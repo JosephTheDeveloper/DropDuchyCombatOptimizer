@@ -61,11 +61,11 @@ The app simulates all possible permutations of unit order and selects the most o
 
 ## 📌 TODOS
 
-UI polish and animations
-Passive abilities support
-Save/load scenarios
-Performance optimizations (pruning permutations)
-Building APK and upload to Play Store!
+* UI polish and animations
+* Passive abilities support
+* Save/load scenarios
+* Performance optimizations (pruning permutations)
+* Building APK and upload to Play Store!
 
 ---
 
