@@ -38,7 +38,7 @@ The app simulates all possible permutations of unit order and selects the most o
 
 ## 🖼️ Screenshots
 
-![App Screenshot](screenshots/Sceenshot_app_preview.png)
+![App Screenshot](screenshots/Screenshot_app_preview.png)
 
 ---
 
