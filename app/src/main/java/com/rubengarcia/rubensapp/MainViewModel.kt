@@ -31,16 +31,13 @@ class MainViewModel : ViewModel() {
 
     private val _toggleAddUnitGroup = mutableStateOf(false)
     val toggleAddUnitGroup: Boolean get() = _toggleAddUnitGroup.value
-
-
     fun buttonStartCalculation(){
         calculateCombat()
     }
     fun buttonReset(){
         clearGroups()
         _combatSummary.clear()
-        _toggleAddUnitGroup.value = false
-        _unitGroupToAdd.value = UnitGroup(side = Side.ALLY, type = UnitType.SWORD, count = 1)
+        toggleAddUnitGroup()
         setCalculationState(CalculationState.IDLE)
     }
     fun buttonClearUnitGroups(){
@@ -64,24 +61,18 @@ class MainViewModel : ViewModel() {
     fun buttonSetUnitGroupCount(count: Int) {
         _unitGroupToAdd.value = _unitGroupToAdd.value.copy(count = count)
     }
-
-
-
-
-
-
     private fun calculateCombat() {
         setCalculationState(CalculationState.CALCULATING)
 
         val bestOrder = findBestOrder(_unitGroups.toList())
 
-        val results =
+        val bestOrderCombatSummary =
             resolveCombat(bestOrder)
 
-        if (results.isNotEmpty()) {
+        if (bestOrderCombatSummary.isNotEmpty()) {
             setCalculationState(CalculationState.FINISHED)
-            _combatSummary.clear()
-            _combatSummary.addAll(results)
+            clearCombatSummary()
+            setCombatSummary(bestOrderCombatSummary)
         }else{
             setCalculationState(CalculationState.ERROR)
         }
@@ -112,10 +103,22 @@ class MainViewModel : ViewModel() {
             setCalculationState(CalculationState.READY)
         }
     }
+    private fun clearCombatSummary(){
+        _combatSummary.clear()
+    }
+    private fun setCombatSummary(summary: List<UnitGroupResultSummary>){
+        _combatSummary.addAll(summary)
+    }
 
     // ADD UNIT GROUP & TOGGLE METHODS
     private fun toggleAddUnitGroup() {
         _toggleAddUnitGroup.value = !_toggleAddUnitGroup.value
+        if (_toggleAddUnitGroup.value) {
+            clearUnitGroupToAdd()
+        }
+    }
+    private fun clearUnitGroupToAdd() {
+        _unitGroupToAdd.value = UnitGroup(side = Side.ALLY, type = UnitType.SWORD, count = 1)
     }
     private fun updateUnitGroupToAdd(newUnitGroup: UnitGroup) {
         _unitGroupToAdd.value = newUnitGroup

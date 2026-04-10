@@ -16,20 +16,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.filled.Cached
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.rubengarcia.rubensapp.gamemanager.Side
 import com.rubengarcia.rubensapp.gamemanager.UnitGroup
 import com.rubengarcia.rubensapp.gamemanager.UnitType
-import com.rubengarcia.rubensapp.ui.composables.AddUnitGroupField
+import com.rubengarcia.rubensapp.ui.composables.AddUnitGroupBox
 import com.rubengarcia.rubensapp.ui.composables.PrimaryColorButton
 import com.rubengarcia.rubensapp.ui.composables.SingleUnitGroupDisplay
 import com.rubengarcia.rubensapp.ui.composables.UnitCombatSummaryDisplay
@@ -49,19 +51,22 @@ import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral60
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary100
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary40
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary60
-import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary80
 import com.rubengarcia.rubensapp.ui.theme.RubensAppTheme
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val windowSizeClass = calculateWindowSizeClass(this)
+
             RubensAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     MainScreen(
                         modifier = Modifier.padding(innerPadding),
-                        viewModel = MainViewModel()
+                        viewModel = MainViewModel(),
+                        windowSizeClass = windowSizeClass
                     )
                 }
             }
@@ -71,91 +76,179 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    windowSizeClass: WindowSizeClass
 ) {
-    Column (
-        modifier = modifier
-            .fillMaxSize(),
-    ) {
+    Column(modifier = modifier.fillMaxSize()) {
         DropDuchyCalculator(
-            mainViewModel = viewModel
+            mainViewModel = viewModel,
+            windowSizeClass = windowSizeClass
         )
     }
 }
 @Composable
 fun DropDuchyCalculator(
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    windowSizeClass: WindowSizeClass
 ) {
-    Column(modifier = Modifier
-        .fillMaxSize(),
-    ) {
+    val screenSize = windowSizeClass.widthSizeClass
+
+    Column(modifier = Modifier.fillMaxSize()) {
         DropDuchyCalculatorTitle(
+            modifier = Modifier,
+            screenSize = screenSize,
             onClearClick = { mainViewModel.buttonReset() }
         )
-        HorizontalDivider(thickness = 2.dp, color = DropDuchyNeutral40)
+        when (screenSize) {
+            WindowWidthSizeClass.Compact,
+            WindowWidthSizeClass.Medium ->
+                DropDuchyCalculatorPortraitLayout(
+                    modifier = Modifier,
+                    mainViewModel = mainViewModel
+                )
 
-        Row(
-            modifier = Modifier.fillMaxSize(),
-        ){
-            PrepareUnitsContent(
-                modifier = Modifier.weight(1f),
-                mainViewModel = mainViewModel
-            )
-            VerticalDivider(thickness = 2.dp, color = DropDuchyNeutral40)
-            ResultSummaryContent(
-                modifier = Modifier.weight(1f),
-                mainViewModel = mainViewModel
-            )
+            WindowWidthSizeClass.Expanded ->
+                DropDuchyCalculatorLandscapeLayout(
+                        modifier = Modifier,
+                        mainViewModel = mainViewModel
+                )
         }
     }
 }
+
+@Composable
+fun DropDuchyCalculatorPortraitLayout(
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel,
+
+) {
+    Column(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        PrepareUnitsContent(
+            modifier = Modifier,
+            mainViewModel = mainViewModel,
+            compact = true
+        )
+
+        HorizontalDivider(
+            thickness = 2.dp,
+            color = DropDuchyNeutral40
+        )
+
+        ResultSummaryContent(
+            modifier = Modifier,
+            mainViewModel = mainViewModel
+        )
+    }
+}
+
+@Composable
+fun DropDuchyCalculatorLandscapeLayout(
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel
+) {
+    Row(modifier = Modifier.fillMaxSize()) {
+
+        PrepareUnitsContent(
+            modifier = Modifier.weight(1f),
+            mainViewModel = mainViewModel,
+            compact = false
+        )
+
+        VerticalDivider(
+            thickness = 2.dp,
+            color = DropDuchyNeutral40
+        )
+
+        ResultSummaryContent(
+            modifier = Modifier.weight(1.2f),
+            mainViewModel = mainViewModel
+        )
+    }
+}
+
 @Composable
 fun DropDuchyCalculatorTitle(
     modifier: Modifier = Modifier,
     onClearClick: () -> Unit = {},
+    screenSize: WindowWidthSizeClass
 ){
+    var titleStyle = typography.headlineLarge
+    var title = "Drop Duchy - Combat Order Optimizer"
+    var iconSize = 60.dp
+
+    when (screenSize) {
+        WindowWidthSizeClass.Compact,
+        WindowWidthSizeClass.Medium -> {
+            titleStyle = typography.bodyLarge
+            title = "Drop Duchy\nCombat Order Optimizer"
+            iconSize = 40.dp
+        }
+    }
+
     Row (
         modifier = modifier
             .background(color = DropDuchyNeutral60)
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.Start
+        horizontalArrangement = Arrangement.SpaceAround
     ) {
-        Icon(
-            modifier = Modifier.size(50.dp),
-            painter = painterResource(id = R.drawable.ic_castle),
-            tint = DropDuchyPrimary60,
-            contentDescription = null,
+        AppLogo(
+            modifier = Modifier.size(iconSize),
         )
-        Spacer(Modifier.padding(horizontal = 50.dp))
         Text(
-            text = "Drop Duchy - Combat Order Optimizer",
-            style = typography.headlineLarge,
+            text = title,
+            style = titleStyle,
             color = DropDuchyPrimary60,
         )
-        Spacer(Modifier.padding(horizontal = 50.dp))
-        Icon(
-            modifier = Modifier
-                .size(40.dp)
-                .clickable(onClick = onClearClick)
-                .border(
-                    width = 1.dp,
-                    color = DropDuchyPrimary40,
-                    shape = RoundedCornerShape(percent = 10)
-                )
-                .padding(6.dp),
-            imageVector = Icons.Default.Refresh,
-            tint = DropDuchyPrimary60,
-            contentDescription = "Clear Button",
+        ClearAllButton(
+            modifier = Modifier.size(iconSize),
+            onClick = onClearClick
         )
     }
+    HorizontalDivider(thickness = 2.dp, color = DropDuchyNeutral40)
+}
+
+@Composable
+fun AppLogo(
+    modifier: Modifier = Modifier,
+    color: Color = DropDuchyPrimary60
+) {
+    Icon(
+        modifier = modifier,
+        painter = painterResource(id = R.drawable.ic_castle),
+        tint = color,
+        contentDescription = null,
+    )
+}
+
+@Composable
+fun ClearAllButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Icon(
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .border(
+                width = 1.dp,
+                color = DropDuchyPrimary40,
+                shape = RoundedCornerShape(percent = 10)
+            )
+            .padding(6.dp),
+        imageVector = Icons.Filled.Cached,
+        tint = DropDuchyPrimary60,
+        contentDescription = "Clear Button",
+    )
 }
 
 @Composable
 fun PrepareUnitsContent(
     modifier: Modifier = Modifier,
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel,
+    compact: Boolean = false
 ) {
     val groups = mainViewModel.unitGroups
 
@@ -171,23 +264,79 @@ fun PrepareUnitsContent(
            modifier = Modifier,
            groups = groups,
         )
-        Spacer(Modifier.weight(1f))
+        if(!compact){
+            Spacer(Modifier.weight(1f))
+        }
+        PrepareUnitsFooterButtons(
+            modifier = Modifier,
+            mainViewModel = mainViewModel,
+            compact = compact
+        )
+    }
+}
+
+@Composable
+fun PrepareUnitsFooterButtons(
+    modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel,
+    compact: Boolean = false
+) {
+    val toggleAddUnitGroup = mainViewModel.toggleAddUnitGroup
+
+    if (compact) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
+            if (!toggleAddUnitGroup) {
+                PrimaryColorButton(
+                    modifier = modifier.fillMaxWidth(),
+                    text = "Add Unit Group",
+                    onClick = {mainViewModel.buttonToggleAddUnitGroup()}
+                )
+            }else{
+                AddUnitGroupBox(
+                    modifier = modifier.fillMaxWidth(),
+                    mainViewModel = mainViewModel
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            PrimaryColorButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Clear Units",
+                onClick = {mainViewModel.buttonClearUnitGroups()}
+            )
+        }
+    }else{
         Row (
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 6.dp),
+            horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.Bottom
         ) {
-            AddUnitGroupField(
-                modifier = Modifier,
-                mainViewModel = mainViewModel,
-            )
+            if (!toggleAddUnitGroup) {
+                PrimaryColorButton(
+                    modifier = modifier.weight(.7f),
+                    text = "Add Unit Group",
+                    onClick = {mainViewModel.buttonToggleAddUnitGroup()}
+                )
+            }else{
+                AddUnitGroupBox(
+                    modifier = modifier.weight(.60f),
+                    mainViewModel = mainViewModel
+                )
+            }
+
+            Spacer(Modifier.width(8.dp))
+
             PrimaryColorButton(
-                modifier = Modifier,
+                modifier = Modifier.weight(.4f),
                 text = "Clear Units",
                 onClick = {mainViewModel.buttonClearUnitGroups()}
             )
         }
     }
 }
+
 
 @Composable
 fun UnitGroupsDisplay(
@@ -200,7 +349,7 @@ fun UnitGroupsDisplay(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
             .background(color = DropDuchyNeutral60, shape = RoundedCornerShape(5.dp))
             .padding(8.dp),
     ) {
@@ -209,7 +358,6 @@ fun UnitGroupsDisplay(
             teamUnitGroups = allyUnitGroups,
             side = Side.ALLY
         )
-        //VerticalDivider(modifier = Modifier, thickness = 2.dp, color = DropDuchyPrimary100)
         TeamUnitGroup(
             modifier = Modifier.weight(1f),
             teamUnitGroups = enemyUnitGroups,
@@ -303,32 +451,6 @@ fun ResultSummaryContent(
 }
 
 @Composable
-fun StartCalculateButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit,
-    calculationState: CalculationState
-) {
-    Button(
-        modifier = modifier.height(60.dp),
-        shape = RoundedCornerShape(percent = 10),
-        enabled = calculationState == CalculationState.READY,
-        onClick = {
-            onClick()
-        }
-    ) {
-        Icon(
-            imageVector = Icons.Default.Edit,
-            contentDescription = null,
-        )
-        Spacer(modifier = Modifier.padding(horizontal = 10.dp))
-        Text(
-            text = "Calculate Best Order",
-            style = typography.headlineSmall
-        )
-    }
-}
-
-@Composable
 fun PrimaryHeader(
     modifier: Modifier,
     text: String,
@@ -337,7 +459,7 @@ fun PrimaryHeader(
         modifier = modifier
             .height(50.dp)
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
