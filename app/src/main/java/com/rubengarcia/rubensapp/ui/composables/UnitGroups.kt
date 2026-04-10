@@ -15,8 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -27,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +50,6 @@ import com.rubengarcia.rubensapp.ui.theme.DropDuchyEnemy60
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral100
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral40
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral60
-import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral80
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary40
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary60
 
@@ -76,10 +77,15 @@ fun UnitCombatSummaryDisplay(
             group = summary.groupB
         )
         Icon(
-            imageVector = Icons.Default.ArrowForward,
+            imageVector = Icons.Filled.ArrowUpward,
             contentDescription = "result",
-            modifier = modifier.padding(horizontal = 6.dp),
+            modifier = modifier.padding(horizontal = 6.dp).rotate(90f),
             tint = DropDuchyPrimary40
+        )
+        Text(
+            text = "->",
+            modifier = modifier.padding(horizontal = 6.dp),
+            color = DropDuchyPrimary40
         )
         SingleUnitGroupDisplay(
             group = summary.result
@@ -257,46 +263,17 @@ fun UnitGroupHeader(
     }
 
 }
-
 @Composable
-fun AddUnitGroupField(
+fun AddUnitGroupBox(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel,
 ) {
     val unitGroupToAdd by mainViewModel.unitGroupToAdd.collectAsState()
     val toggleAddUnitGroup = mainViewModel.toggleAddUnitGroup
 
-    if (!toggleAddUnitGroup) {
-        PrimaryColorButton(
-            modifier = modifier,
-            text = "Add Unit Group",
-            onClick = {mainViewModel.buttonToggleAddUnitGroup()}
-        )
-    }else{
-        AddUnitGroupBox(
-            modifier = modifier,
-            unitGroupToAdd = unitGroupToAdd,
-            setUnitGroupCount = {mainViewModel.buttonSetUnitGroupCount(it)},
-            setUnitGroupSide = {mainViewModel.buttonSetUnitGroupSide(it)},
-            setUnitGroupType = {mainViewModel.buttonSetUnitGroupType(it)},
-            onConfirmAddUnitGroup = {mainViewModel.buttonAddUnitGroup()},
-            onDismissAddUnitGroup = {mainViewModel.buttonToggleAddUnitGroup()}
-        )
-    }
-}
-@Composable
-fun AddUnitGroupBox(
-    modifier: Modifier = Modifier,
-    unitGroupToAdd: UnitGroup?,
-    setUnitGroupSide: (Side) -> Unit,
-    setUnitGroupType: (UnitType) -> Unit,
-    setUnitGroupCount: (Int) -> Unit,
-    onConfirmAddUnitGroup: () -> Unit,
-    onDismissAddUnitGroup: () -> Unit
-) {
+
     Column(
         modifier = modifier
-            .fillMaxWidth(.6f)
             .background(color = DropDuchyNeutral60, shape = RoundedCornerShape(8.dp))
             .padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -305,39 +282,34 @@ fun AddUnitGroupBox(
         UnitGroupSideSelector(
             modifier = Modifier.fillMaxWidth(),
             selectedSide = unitGroupToAdd?.side ?: Side.ALLY,
-            setUnitGroupSide = setUnitGroupSide
+            setUnitGroupSide = {mainViewModel.buttonSetUnitGroupSide(it)}
         )
-
         Text(
             text = "UNIT SPECIFICATION",
             style = typography.labelMedium,
             color = DropDuchyNeutral40,
             letterSpacing = 1.sp
         )
-
         UnitGroupTypeSelector(
             modifier = Modifier.fillMaxWidth(),
             selectedType = unitGroupToAdd?.type ?: UnitType.SWORD,
-            setUnitGroupType = setUnitGroupType
+            setUnitGroupType = {mainViewModel.buttonSetUnitGroupType(it)}
         )
-
         Text(
             text = "BATTALION SIZE",
             style = typography.labelMedium,
             color = DropDuchyNeutral40,
             letterSpacing = 1.sp
         )
-
         UnitGroupCountSelector(
             modifier = Modifier.fillMaxWidth(),
             selectedCount = unitGroupToAdd?.count ?: 1,
-            setUnitGroupCount = setUnitGroupCount
+            setUnitGroupCount = {mainViewModel.buttonSetUnitGroupCount(it)}
         )
-
         PrimaryColorButton(
             modifier = Modifier.fillMaxWidth(),
             text = "Add Unit Group",
-            onClick = onConfirmAddUnitGroup,
+            onClick = {mainViewModel.buttonAddUnitGroup()},
         )
     }
 }
@@ -349,20 +321,20 @@ fun PrimaryColorButton(
     onClick: () -> Unit
 ) {
     Button(
-        modifier = modifier.height(56.dp),
+        modifier = modifier,
         onClick = onClick,
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = DropDuchyPrimary60,
             contentColor = DropDuchyNeutral100
         ),
-        shape = RoundedCornerShape(4.dp)
+        shape = RoundedCornerShape(6.dp)
     ) {
         Text(
             text = text,
             style = typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 1.sp
+            letterSpacing = .5f.sp
         )
     }
 }

@@ -19,6 +19,16 @@ val NewsreaderFontFamily = FontFamily(
 
 
 val Typography = Typography(
+
+    //Medium & Compact screen size
+
+
+
+    //Expanded screen size
+
+
+
+
     bodyLarge = TextStyle(
         fontFamily = NewsreaderFontFamily,
         fontWeight = FontWeight.Normal,
