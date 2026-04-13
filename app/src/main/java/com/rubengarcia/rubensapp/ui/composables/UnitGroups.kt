@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.rubengarcia.rubensapp.MainViewModel
@@ -47,6 +48,7 @@ import com.rubengarcia.rubensapp.ui.theme.DropDuchyAlly60
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyEnemy100
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyEnemy40
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyEnemy60
+import com.rubengarcia.rubensapp.ui.theme.DropDuchyEnemy80
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral100
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral40
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral60
@@ -67,28 +69,29 @@ fun UnitCombatSummaryDisplay(
         horizontalArrangement = Arrangement.SpaceEvenly
     ){
         SingleUnitGroupDisplay(
-            group = summary.groupA
+            group = summary.groupA,
+            compact = true
+
         )
         CombatTypeIcon(
             modifier = modifier.padding(horizontal = 6.dp),
             combatType = summary.combatType
         )
         SingleUnitGroupDisplay(
-            group = summary.groupB
+            group = summary.groupB,
+            compact = true
         )
         Icon(
             imageVector = Icons.Filled.ArrowUpward,
             contentDescription = "result",
-            modifier = modifier.padding(horizontal = 6.dp).rotate(90f),
+            modifier = modifier
+                .padding(horizontal = 6.dp)
+                .rotate(90f),
             tint = DropDuchyPrimary40
         )
-        Text(
-            text = "->",
-            modifier = modifier.padding(horizontal = 6.dp),
-            color = DropDuchyPrimary40
-        )
         SingleUnitGroupDisplay(
-            group = summary.result
+            group = summary.result,
+            compact = true
         )
     }
 }
@@ -96,8 +99,15 @@ fun UnitCombatSummaryDisplay(
 @Composable
 fun SingleUnitGroupDisplay(
     modifier: Modifier = Modifier,
-    group: UnitGroup
+    group: UnitGroup,
+    compact: Boolean = false
 ) {
+    if(compact){
+        return SingleUnitGroupDisplayCompact(
+            modifier = modifier,
+            group = group
+        )
+    }
     val troops = group.count
     var supportText = ""
     var color : Color
@@ -158,6 +168,53 @@ fun SingleUnitGroupDisplay(
         Spacer(Modifier.width(8.dp))
         UnitIcon(
             modifier = Modifier.size(40.dp),
+            type = unitType,
+            color = color
+        )
+
+    }
+}
+@Composable
+fun SingleUnitGroupDisplayCompact(
+    modifier: Modifier = Modifier,
+    group: UnitGroup,
+) {
+    var unitType = group.type
+    var color : Color = Color.Gray
+    var bgColor : Color = Color.DarkGray
+
+    when{
+        group.count == 0 -> {
+            color = Color.Gray
+            bgColor = Color.DarkGray
+            unitType = UnitType.NEUTRAL
+        }
+        group.side == Side.ALLY -> {
+            color = DropDuchyAlly60
+            bgColor = DropDuchyAlly100
+        }
+        group.side == Side.ENEMY -> {
+            color = DropDuchyEnemy60
+            bgColor = DropDuchyEnemy100
+        }
+    }
+
+    Row(
+        modifier = modifier
+            .border(width = Dp.Hairline, shape = RoundedCornerShape(percent = 10), color = color)
+            .background(color = bgColor, shape = RoundedCornerShape(percent = 10))
+            .padding(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        Text(
+            text = group.count.toString(),
+            style = typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        )
+        UnitIcon(
+            modifier = Modifier.size(35.dp),
             type = unitType,
             color = color
         )
