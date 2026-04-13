@@ -162,7 +162,7 @@ fun DropDuchyCalculatorLandscapeLayout(
         )
 
         ResultSummaryContent(
-            modifier = Modifier.weight(1.2f),
+            modifier = Modifier.weight(1f),
             mainViewModel = mainViewModel
         )
     }
@@ -336,7 +336,6 @@ fun PrepareUnitsFooterButtons(
         }
     }
 }
-
 
 @Composable
 fun UnitGroupsDisplay(
