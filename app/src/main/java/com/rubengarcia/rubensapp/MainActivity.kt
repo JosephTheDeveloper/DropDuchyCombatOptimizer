@@ -57,6 +57,7 @@ import com.rubengarcia.rubensapp.ui.theme.DropDuchyNeutral60
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary100
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary40
 import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary60
+import com.rubengarcia.rubensapp.ui.theme.DropDuchyPrimary80
 import com.rubengarcia.rubensapp.ui.theme.RubensAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -85,7 +86,10 @@ fun MainScreen(
     viewModel: MainViewModel,
     windowSizeClass: WindowSizeClass
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+    ) {
         DropDuchyCalculator(
             mainViewModel = viewModel,
             windowSizeClass = windowSizeClass
@@ -128,22 +132,22 @@ fun DropDuchyCalculatorPortraitLayout(
     mainViewModel: MainViewModel,
 
 ) {
-    Column(
-        modifier = Modifier.fillMaxSize()
+    LazyColumn(
+        modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
-        PrepareUnitsContent(
-            modifier = Modifier,
-            mainViewModel = mainViewModel,
-            compact = true
-        )
-        HorizontalDivider(
-            thickness = 2.dp,
-            color = DropDuchyNeutral40
-        )
-        ResultSummaryContent(
-            modifier = Modifier,
-            mainViewModel = mainViewModel
-        )
+        item {
+            PrepareUnitsContent(
+                modifier = Modifier,
+                mainViewModel = mainViewModel,
+                compact = true
+            )
+        }
+        item{
+            ResultSummaryContent(
+                modifier = Modifier,
+                mainViewModel = mainViewModel
+            )
+        }
     }
 }
 
@@ -152,10 +156,13 @@ fun DropDuchyCalculatorLandscapeLayout(
     modifier: Modifier = Modifier,
     mainViewModel: MainViewModel
 ) {
-    Row(modifier = Modifier.fillMaxSize()) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
 
         PrepareUnitsContent(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp, vertical = 4.dp),
             mainViewModel = mainViewModel,
             compact = false
         )
@@ -166,7 +173,7 @@ fun DropDuchyCalculatorLandscapeLayout(
         )
 
         ResultSummaryContent(
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).padding(horizontal = 8.dp, vertical = 4.dp),
             mainViewModel = mainViewModel
         )
     }
@@ -314,8 +321,7 @@ fun PrepareUnitsFooterButtons(
     }else{
         Row (
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp),
+                .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.Bottom
         ) {
@@ -354,14 +360,11 @@ fun UnitGroupsDisplay(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
             .background(color = DropDuchyNeutral60, shape = RoundedCornerShape(5.dp))
-            .padding(8.dp),
+            .padding(4.dp),
     ) {
         TeamUnitGroup(
-            modifier = Modifier
-                .weight(1f)
-                .heightIn(max = 200.dp),
+            modifier = Modifier.weight(1f),
             teamUnitGroups = allyUnitGroups,
             side = Side.ALLY
         )
@@ -381,21 +384,19 @@ fun TeamUnitGroup(
 ) {
     val totalUnits = teamUnitGroups.sumOf { it.count }
 
-    LazyColumn(
+    Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        item {
-            UnitGroupHeader(side = side, amount = totalUnits)
-            HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp), thickness = 2.dp, color = DropDuchyPrimary100)
-        }
-        items(teamUnitGroups) { group ->
+        UnitGroupHeader(side = side, amount = totalUnits)
+        HorizontalDivider(modifier = Modifier.padding(vertical = 2.dp), thickness = 2.dp, color = DropDuchyPrimary100)
+
+        for (group in teamUnitGroups) {
             SingleUnitGroupDisplay(group = group)
         }
     }
 }
-
 @Composable
 fun ResultSummaryContent(
     modifier: Modifier = Modifier,
@@ -433,15 +434,16 @@ fun ResultSummaryContent(
                     modifier = Modifier,
                     resultingGroup = finalResult
                 )
+                Spacer(modifier = Modifier.height(8.dp))
                 ResultSummaryDisplay(
                     modifier = Modifier,
                     combatSummary = combatSummary
                 )
             }
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(8.dp).weight(1f))
         PrimaryColorButton(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             onClick = { mainViewModel.buttonStartCalculation() },
             enabled = calculationState == CalculationState.READY,
             text = "Calculate Best Order"
@@ -462,7 +464,7 @@ fun PrimaryHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Start
     ) {
-        VerticalDivider(modifier = Modifier.padding(horizontal = 12.dp),thickness = 2.dp, color = DropDuchyPrimary40)
+        VerticalDivider(modifier = Modifier.padding(end = 12.dp),thickness = 2.dp, color = DropDuchyPrimary40)
         Text(
             modifier = Modifier,
             text = text,
@@ -477,20 +479,23 @@ fun BestOutcomeResultDisplay(
     modifier: Modifier = Modifier,
     resultingGroup: UnitGroup
 ) {
-    val shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 15.dp, bottomEnd = 15.dp)
+    val shape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
     Column(
         modifier = modifier
-            .padding(horizontal = 12.dp)
             .fillMaxWidth()
             .background(color = DropDuchyNeutral60, shape = shape)
             .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-            ResultDisplay(
-                modifier = Modifier,
-                winnersSide = resultingGroup.side
-            )
-        SingleUnitGroupDisplay(group = resultingGroup)
+        ResultDisplay(
+            modifier = Modifier,
+            winnersSide = resultingGroup.side
+        )
+        SingleUnitGroupDisplay(
+            modifier = Modifier,
+            group = resultingGroup
+        )
     }
 }
 
@@ -500,20 +505,18 @@ fun ResultDisplay(
     winnersSide: Side
 ) {
     val iconID : Int
-    val color : Color
+    val icColor : Color = DropDuchyPrimary80
     val bgColor : Color
     val text : String
 
     when(winnersSide){
         Side.ALLY -> {
             iconID = R.drawable.ic_rally
-            color = DropDuchyAlly60
             bgColor = DropDuchyAlly100
             text = "VICTORY!"
         }
         Side.ENEMY -> {
             iconID = R.drawable.ic_castleruins
-            color = DropDuchyEnemy60
             bgColor = DropDuchyEnemy100
             text = "DEFEAT!"
         }
@@ -526,15 +529,14 @@ fun ResultDisplay(
             shape = RoundedCornerShape(percent = 10)
         ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         Icon(
             modifier = Modifier
-                .size(60.dp)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .size(50.dp),
             painter = painterResource(id = iconID),
             contentDescription = null,
-            tint = color,
+            tint = icColor,
         )
 
         Text(
@@ -545,11 +547,10 @@ fun ResultDisplay(
 
         Icon(
             modifier = Modifier
-                .size(60.dp)
-                .padding(horizontal = 8.dp, vertical = 4.dp),
+                .size(50.dp),
             painter = painterResource(id = iconID),
             contentDescription = null,
-            tint = color,
+            tint = icColor,
         )
     }
 }
@@ -559,21 +560,30 @@ fun ResultSummaryDisplay(
     modifier: Modifier = Modifier,
     combatSummary: List<UnitGroupResultSummary>
 ) {
-    Text(
-        text = "Combat Order:",
-        style = typography.bodyLarge,
-        color = DropDuchyPrimary40,
-    )
+    val shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp, bottomStart = 0.dp, bottomEnd = 0.dp)
 
-    LazyColumn(
-        modifier = Modifier,
-        verticalArrangement = Arrangement.spacedBy(2.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Column (
+        modifier = modifier
+            .fillMaxWidth()
+            .background(color = DropDuchyNeutral60, shape = shape)
+            .padding(vertical = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(combatSummary) { summary ->
-            UnitCombatSummaryDisplay(
-                summary = summary
-            )
+        Text(
+            text = "- Combat Order -",
+            style = typography.bodyLarge,
+            color = DropDuchyPrimary40,
+        )
+
+        Column(
+            modifier = Modifier,
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            for (summary in combatSummary) {
+                UnitCombatSummaryDisplay(summary = summary)
+            }
         }
     }
 }

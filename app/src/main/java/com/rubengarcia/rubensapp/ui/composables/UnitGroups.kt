@@ -63,15 +63,13 @@ fun UnitCombatSummaryDisplay(
 ) {
     Row(
         modifier = modifier
-            .background(color = DropDuchyNeutral60, shape = RoundedCornerShape(percent = 10))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ){
         SingleUnitGroupDisplay(
             group = summary.groupA,
             compact = true
-
         )
         CombatTypeIcon(
             modifier = modifier.padding(horizontal = 6.dp),
@@ -257,14 +255,10 @@ fun CombatTypeIcon(
         painter = painterResource(id = drawableId),
         contentDescription = combatType.name,
         modifier = modifier
-            .size(50.dp)
-            .border(
-                width = 1.dp,
-                color = DropDuchyPrimary40,
-                shape = RoundedCornerShape(percent = 10)
-            )
+            .size(35.dp)
+            .background(shape = RoundedCornerShape(percent = 10), color = DropDuchyPrimary60)
             .padding(6.dp),
-        tint = DropDuchyPrimary40
+        tint = DropDuchyNeutral60
     )
 }
 
@@ -291,7 +285,7 @@ fun UnitGroupHeader(
 
     Row(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .background(backGroundColor, shape = RoundedCornerShape(percent = 10)),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.SpaceAround
