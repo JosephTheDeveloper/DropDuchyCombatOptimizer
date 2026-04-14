@@ -36,8 +36,8 @@ class MainViewModel : ViewModel() {
     }
     fun buttonReset(){
         clearGroups()
-        _combatSummary.clear()
-        toggleAddUnitGroup()
+        clearCombatSummary()
+        closeAddUnitGroup()
         setCalculationState(CalculationState.IDLE)
     }
     fun buttonClearUnitGroups(){
@@ -117,6 +117,9 @@ class MainViewModel : ViewModel() {
             clearUnitGroupToAdd()
         }
     }
+    private fun closeAddUnitGroup() {
+        _toggleAddUnitGroup.value = false
+    }
     private fun clearUnitGroupToAdd() {
         _unitGroupToAdd.value = UnitGroup(side = Side.ALLY, type = UnitType.SWORD, count = 1)
     }
@@ -124,7 +127,7 @@ class MainViewModel : ViewModel() {
         _unitGroupToAdd.value = newUnitGroup
     }
     private fun addUnitGroupToUnitGroups() {
-        _unitGroupToAdd.value?.let { unitGroup ->
+        _unitGroupToAdd.value.let { unitGroup ->
             addUnitGroup(unitGroup)
         }
         toggleAddUnitGroup()
